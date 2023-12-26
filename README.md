@@ -1,7 +1,7 @@
 
 # Image Overlay Kit
 
-The `imo` library provides away to handle incremental image
+The `imo` library provides a way to handle incremental image
 updates in container registries. It allows users to pull the
 difference between two image versions and push this differential
 update to a registry.
