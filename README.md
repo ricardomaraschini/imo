@@ -61,8 +61,8 @@ func pull() {
 	// pull the differential update
 	diff, err := inc.Pull(
 		context.Background(),
-		"myaccount/myapp:v1.0.0",
-		"myaccount/myapp:v2.0.0",
+		"docker.io/myaccount/myapp:v1.0.0",
+		"docker.io/myaccount/myapp:v2.0.0",
 	)
 	if err != nil {
 		panic(err)
@@ -107,7 +107,7 @@ func push() {
 	if err := imo.PushVet(
 		context.Background(),
 		"difference.tar",
-		"myregistry.io/myaccount/app:v3.0.0",
+		"myregistry.io/myaccount/app:v1.0.0",
 	); err != nil {
 		panic(err)
 	}
@@ -116,7 +116,7 @@ func push() {
 	if err := inc.Push(
 		context.Background(),
 		"difference.tar",
-		"myaccount/app:v3.0.0",
+		"myregistry.io/myaccount/app:v2.0.0",,
 	); err != nil {
 		panic(err)
 	}
