@@ -11,14 +11,6 @@ especially useful in air-gapped (disconnected) environments.
 
 ## Key Types and Functions
 
-### Authentications
-Authentications holds the credentials needed for interacting with
-different container registries. It includes:
-
-- **BaseAuth**: Authentication for the base image's registry (_image v1_).
-- **FinalAuth**: Authentication for the final image's registry (_image v2_).
-- **PushAuth**: Authentication for the destination registry when pushing an image.
-
 ### Incremental
 
 The `Incremental` type offers methods to retrieve (via `Pull`) or transmit
