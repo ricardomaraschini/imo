@@ -2,6 +2,8 @@
     <img src="banner.png" alt="Banner">
 </p>
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/ricardomaraschini/imo.svg)](https://pkg.go.dev/github.com/ricardomaraschini/imo)
+
 # Image Overlay Kit
 
 The `imo` library provides a way to handle incremental image
