@@ -32,5 +32,6 @@ jobs:
         user:  ${{ github.repository_owner }}
         container: imo/e2e
         prune-untagged: true
+        keep-last: 2
         prune-tags-regexes: |
           ^pr-${{ github.event.pull_request.number }}$
