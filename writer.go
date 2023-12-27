@@ -24,7 +24,7 @@ func (i *Writer) NewImageDestination(ctx context.Context, sys *types.SystemConte
 // layers that are already present.
 type destwrap struct {
 	types.ImageDestination
-	index *ManifestsIndex
+	baseimage *ManifestsIndex
 }
 
 // TryReusingBlob is called by the image copy code to check if a layer is
@@ -32,7 +32,7 @@ type destwrap struct {
 // layer info. If it is not, we return false and the layer info. We use the
 // manifest to check if the layer is already present.
 func (d *destwrap) TryReusingBlob(ctx context.Context, info types.BlobInfo, cache types.BlobInfoCache, substitute bool) (bool, types.BlobInfo, error) {
-	if d.index.HasLayer(info.Digest) {
+	if d.baseimage.HasLayer(info.Digest) {
 		return true, info, nil
 	}
 	return false, info, nil
@@ -49,7 +49,7 @@ func NewWriterFromScratch(ctx context.Context, to types.ImageReference, sysctx *
 		ImageReference: to,
 		dest: &destwrap{
 			ImageDestination: toref,
-			index:            NewManifestsIndex(sysctx),
+			baseimage:        NewManifestsIndex(sysctx),
 		},
 	}, nil
 }
@@ -61,15 +61,15 @@ func NewWriter(ctx context.Context, from types.ImageReference, to types.ImageRef
 	if err != nil {
 		return nil, fmt.Errorf("error creating destination: %w", err)
 	}
-	index := NewManifestsIndex(sysctx)
-	if err := index.FetchManifests(ctx, from); err != nil {
+	baseimage := NewManifestsIndex(sysctx)
+	if err := baseimage.FetchManifests(ctx, from); err != nil {
 		return nil, fmt.Errorf("error fetching manifests: %w", err)
 	}
 	return &Writer{
 		ImageReference: to,
 		dest: &destwrap{
 			ImageDestination: toref,
-			index:            index,
+			baseimage:        baseimage,
 		},
 	}, nil
 }
