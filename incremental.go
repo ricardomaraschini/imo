@@ -51,11 +51,10 @@ func (inc *Incremental) PushVet(ctx context.Context, src, dst string) error {
 		return fmt.Errorf("error parsing destination reference: %w", err)
 	}
 	sysctx := &types.SystemContext{DockerAuthConfig: inc.auths.PushAuth}
-	mans, err := fetchManifests(ctx, dstref, sysctx)
-	if err != nil {
+	dstman := NewManifestsIndex(sysctx)
+	if err := dstman.FetchManifests(ctx, dstref); err != nil {
 		return fmt.Errorf("error fetching destination manifests: %w", err)
 	}
-	dict := buildLayersDictionary(mans...)
 	srcref, err := alltransports.ParseImageName(fmt.Sprintf("oci-archive:%s", src))
 	if err != nil {
 		return fmt.Errorf("error parsing source reference: %w", err)
@@ -65,11 +64,11 @@ func (inc *Incremental) PushVet(ctx context.Context, src, dst string) error {
 		return fmt.Errorf("error creating source image: %w", err)
 	}
 	defer srcimage.Close()
-	srcmans, err := fetchManifests(ctx, srcref, &types.SystemContext{})
-	if err != nil {
+	srcman := NewManifestsIndex(&types.SystemContext{})
+	if err := srcman.FetchManifests(ctx, srcref); err != nil {
 		return fmt.Errorf("error fetching source manifests: %w", err)
 	}
-	for _, srcman := range srcmans {
+	for _, srcman := range srcman.Manifests() {
 		for _, layer := range srcman.LayerInfos() {
 			binfo := types.BlobInfo{Digest: layer.Digest}
 			blob, _, err := srcimage.GetBlob(ctx, binfo, nil)
@@ -77,7 +76,7 @@ func (inc *Incremental) PushVet(ctx context.Context, src, dst string) error {
 				blob.Close()
 				continue
 			}
-			if _, ok := dict[layer.Digest]; ok {
+			if dstman.HasLayer(layer.Digest) {
 				continue
 			}
 			return fmt.Errorf("%s not found in destination", layer.Digest)
