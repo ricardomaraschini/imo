@@ -51,11 +51,11 @@ func (inc *Incremental) PushVet(ctx context.Context, src, dst string) error {
 		return fmt.Errorf("error parsing destination reference: %w", err)
 	}
 	sysctx := &types.SystemContext{DockerAuthConfig: inc.auths.PushAuth}
-	mans, err := FetchManifests(ctx, dstref, sysctx)
+	mans, err := fetchManifests(ctx, dstref, sysctx)
 	if err != nil {
 		return fmt.Errorf("error fetching destination manifests: %w", err)
 	}
-	dict := BuildLayersDictionary(mans...)
+	dict := buildLayersDictionary(mans...)
 	srcref, err := alltransports.ParseImageName(fmt.Sprintf("oci-archive:%s", src))
 	if err != nil {
 		return fmt.Errorf("error parsing source reference: %w", err)
@@ -65,7 +65,7 @@ func (inc *Incremental) PushVet(ctx context.Context, src, dst string) error {
 		return fmt.Errorf("error creating source image: %w", err)
 	}
 	defer srcimage.Close()
-	srcmans, err := FetchManifests(ctx, srcref, &types.SystemContext{})
+	srcmans, err := fetchManifests(ctx, srcref, &types.SystemContext{})
 	if err != nil {
 		return fmt.Errorf("error fetching source manifests: %w", err)
 	}
@@ -100,7 +100,7 @@ func (inc *Incremental) Push(ctx context.Context, src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("error parsing source reference: %w", err)
 	}
-	polctx, err := PolicyContext()
+	polctx, err := policyContext()
 	if err != nil {
 		return fmt.Errorf("error creating policy context: %w", err)
 	}
@@ -125,7 +125,9 @@ func (inc *Incremental) Push(ctx context.Context, src, dst string) error {
 
 // Pull pulls the incremental difference between two images. Returns an ReaderCloser from
 // where can be read as an oci-archive tarball. The caller is responsible for closing the
-// reader.
+// reader. If 'base' is equal to 'scratch' then we do not compare the layers of the final
+// image with the layers of the base image. In this case, the returned tarball contains
+// all the layers of the final image.
 func (inc *Incremental) Pull(ctx context.Context, base, final string) (io.ReadCloser, error) {
 	base = fmt.Sprintf("docker://%s", base)
 	baseref, err := alltransports.ParseImageName(base)
@@ -144,11 +146,17 @@ func (inc *Incremental) Pull(ctx context.Context, base, final string) (io.ReadCl
 		return nil, fmt.Errorf("error parsing destination reference: %w", err)
 	}
 	sysctx := &types.SystemContext{DockerAuthConfig: inc.auths.BaseAuth}
-	destref, err := NewWriter(ctx, baseref, dstref, sysctx)
-	if err != nil {
-		return nil, fmt.Errorf("error creating incremental writer: %w", err)
+	var destref *Writer
+	if base == "docker://scratch" {
+		if destref, err = NewWriterFromScratch(ctx, dstref, sysctx); err != nil {
+			return nil, fmt.Errorf("error creating incremental writer: %w", err)
+		}
+	} else {
+		if destref, err = NewWriter(ctx, baseref, dstref, sysctx); err != nil {
+			return nil, fmt.Errorf("error creating incremental writer: %w", err)
+		}
 	}
-	polctx, err := PolicyContext()
+	polctx, err := policyContext()
 	if err != nil {
 		return nil, fmt.Errorf("error creating policy context: %w", err)
 	}
