@@ -90,11 +90,18 @@ func TestIncrementalE2E(t *testing.T) {
 	assert.NoError(t, err, "unable to copy image to temp file")
 	err = tmpf.Close()
 	assert.NoError(t, err, "unable to close temp file")
-	// pushes the pulled tomecat:10.1 to the registry under.
+	originfo, err := os.Stat(tmpf.Name())
+	assert.NoError(t, err, "unable to stat temp file")
+	t.Log("original image size:", originfo.Size())
+
+	// pushes the pulled tomcat:10.1 to the registry under the
+	// tag specified in the environment variable.
 	dst := fmt.Sprintf("%s/e2e:%s", addr, tag)
 	err = inc.Push(ctx, tmpf.Name(), dst)
 	assert.NoError(t, err, "unable to push whole image")
+
 	// pulls the difference between tomcat:10.1 and tomcat:11.0.
+	// this will result in a smaller image.
 	tmpf, err = os.CreateTemp("", "diff-*.tar")
 	assert.NoError(t, err, "unable to create second temp file")
 	defer os.Remove(tmpf.Name())
@@ -104,9 +111,14 @@ func TestIncrementalE2E(t *testing.T) {
 	assert.NoError(t, err, "unable to copy difference to temp file")
 	err = tmpf.Close()
 	assert.NoError(t, err, "unable to close temp file")
+	diffinfo, err := os.Stat(tmpf.Name())
+	assert.NoError(t, err, "unable to stat temp file")
+	t.Log("diff image size:", diffinfo.Size())
+
 	// vet push (makes sure all non locally present layers exist remotely).
 	err = inc.PushVet(ctx, tmpf.Name(), dst)
 	assert.NoError(t, err, "unable to push vet image")
+
 	// pushes the difference between tomcat:10.1 and tomcat:11.0.
 	err = inc.Push(ctx, tmpf.Name(), dst)
 	assert.NoError(t, err, "unable to push difference")
