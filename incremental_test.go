@@ -58,7 +58,7 @@ func TestIncrementalPullAlpine(t *testing.T) {
 
 // This test depends on a few environment variables to be set in order for it to
 // run. You need to specify the following variables:
-// REGISTRY_USERNAME, REGISTRY_PASSWORD, REGISTRY_REPOADDR, and REGISTRY_TAGNAME.
+// REGISTRY_USERNAME, REGISTRY_PASSWORD, REGISTRY_REPOADDR, and REGISTRY_IMGNAME.
 // If these are not set, the test will be skipped. These environment variables
 // point to a registry to where we can write and image and read it back from.
 // This test copies the tomcat:10.1 image to this location under a random tag
@@ -70,8 +70,8 @@ func TestIncrementalE2E(t *testing.T) {
 	user := os.Getenv("REGISTRY_USERNAME")
 	pass := os.Getenv("REGISTRY_PASSWORD")
 	addr := os.Getenv("REGISTRY_REPOADDR")
-	tag := os.Getenv("REGISTRY_TAGNAME")
-	if user == "" || pass == "" || addr == "" || tag == "" {
+	image := os.Getenv("REGISTRY_IMGNAME")
+	if user == "" || pass == "" || addr == "" || image == "" {
 		t.Skip("environment variables not set, skipping")
 	}
 	inc := New(
@@ -96,7 +96,7 @@ func TestIncrementalE2E(t *testing.T) {
 
 	// pushes the pulled tomcat:10.1 to the registry under the
 	// tag specified in the environment variable.
-	dst := fmt.Sprintf("%s/e2e:%s", addr, tag)
+	dst := fmt.Sprintf("%s/%s:latest", addr, image)
 	err = inc.Push(ctx, tmpf.Name(), dst)
 	assert.NoError(t, err, "unable to push whole image")
 
