@@ -25,3 +25,12 @@ jobs:
       uses: actions/checkout@v4
     - name: run tests
       run: go test -tags containers_image_openpgp -v ./...
+    - name: prune ghcr
+      uses: vlaurin/action-ghcr-prune@v0.5.0
+      with:
+        token: ${{ secrets.GHCR_PAT }}
+        user:  ${{ github.repository_owner }}
+        container: imo/e2e
+        prune-untagged: true
+        prune-tags-regexes: |
+          ^pr-${{ github.event.pull_request.number }}$
