@@ -1,6 +1,7 @@
 package imo
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -10,6 +11,50 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+// Makes sure we are writing the output to a different writer, not os.Stdout.
+func TestIncrementalCustomWriter(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+	buf := bytes.NewBuffer(nil)
+	inc := New(
+		WithReporterWriter(buf),
+		WithAllArchitectures(),
+	)
+	tmpf, err := os.CreateTemp("", "diff-*.tar")
+	assert.NoError(t, err, "unable to create temp file")
+	defer os.Remove(tmpf.Name())
+	diff, err := inc.Pull(ctx, "scratch", "quay.io/prometheus/memcached-exporter")
+	assert.NoError(t, err, "unable to pull the whole image")
+	defer diff.Close()
+	_, err = io.Copy(tmpf, diff)
+	assert.NoError(t, err, "unable to copy image to temp file")
+	err = tmpf.Close()
+	assert.NoError(t, err, "unable to close temp file")
+	assert.NotEmpty(t, buf.String(), "no output written to buffer")
+}
+
+// TestPullAlpine pulls all alpine images into an oci-archive on disk. copies all
+// architecures.
+func TestIncrementalPullAlpine(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+	inc := New(
+		WithReporterWriter(os.Stdout),
+		WithAllArchitectures(),
+	)
+	// pulls alpine:latest into an oci-archive.
+	tmpf, err := os.CreateTemp("", "diff-*.tar")
+	assert.NoError(t, err, "unable to create temp file")
+	defer os.Remove(tmpf.Name())
+	diff, err := inc.Pull(ctx, "scratch", "alpine:latest")
+	assert.NoError(t, err, "unable to pull the whole image")
+	defer diff.Close()
+	_, err = io.Copy(tmpf, diff)
+	assert.NoError(t, err, "unable to copy image to temp file")
+	err = tmpf.Close()
+	assert.NoError(t, err, "unable to close temp file")
+}
 
 // This test depends on a few environment variables to be set in order for it to
 // run. You need to specify the following variables:
@@ -40,6 +85,7 @@ func TestIncrementalE2E(t *testing.T) {
 	defer os.Remove(tmpf.Name())
 	diff, err := inc.Pull(ctx, "scratch", "tomcat:10.1")
 	assert.NoError(t, err, "unable to pull the whole image")
+	defer diff.Close()
 	_, err = io.Copy(tmpf, diff)
 	assert.NoError(t, err, "unable to copy image to temp file")
 	err = tmpf.Close()
