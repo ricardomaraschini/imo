@@ -39,6 +39,22 @@ func (d *destwrap) TryReusingBlob(ctx context.Context, info types.BlobInfo, cach
 	return false, info, nil
 }
 
+// NewWriterFromScratch uses the "scratch" image as base and stores the
+// result in 'to'. This is useful to create a new image from scratch.
+func NewWriterFromScratch(ctx context.Context, to types.ImageReference, sysctx *types.SystemContext) (*Writer, error) {
+	toref, err := to.NewImageDestination(ctx, sysctx)
+	if err != nil {
+		return nil, fmt.Errorf("error creating destination: %w", err)
+	}
+	return &Writer{
+		ImageReference: to,
+		dest: &destwrap{
+			ImageDestination: toref,
+			manifests:        map[digest.Digest]bool{},
+		},
+	}, nil
+}
+
 // NewWriter is capable of providing an incremental copy of an image using
 // 'from' as base and storing the result in 'to'.
 func NewWriter(ctx context.Context, from types.ImageReference, to types.ImageReference, sysctx *types.SystemContext) (*Writer, error) {
@@ -46,7 +62,7 @@ func NewWriter(ctx context.Context, from types.ImageReference, to types.ImageRef
 	if err != nil {
 		return nil, fmt.Errorf("error creating destination: %w", err)
 	}
-	mans, err := FetchManifests(ctx, from, sysctx)
+	mans, err := fetchManifests(ctx, from, sysctx)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching manifests: %w", err)
 	}
@@ -54,7 +70,7 @@ func NewWriter(ctx context.Context, from types.ImageReference, to types.ImageRef
 		ImageReference: to,
 		dest: &destwrap{
 			ImageDestination: toref,
-			manifests:        BuildLayersDictionary(mans...),
+			manifests:        buildLayersDictionary(mans...),
 		},
 	}, nil
 }
