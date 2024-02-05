@@ -3,7 +3,7 @@ module github.com/ricardomaraschini/imo
 go 1.21.0
 
 require (
-	github.com/containers/image/v5 v5.29.1
+	github.com/containers/image/v5 v5.29.2
 	github.com/google/uuid v1.6.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/stretchr/testify v1.8.4
