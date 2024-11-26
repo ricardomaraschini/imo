@@ -8,7 +8,7 @@ require (
 	github.com/containers/image/v5 v5.33.0
 	github.com/google/uuid v1.6.0
 	github.com/opencontainers/go-digest v1.0.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
