@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Makes sure we are writing the output to a different writer, not os.Stdout.
@@ -47,8 +48,8 @@ func TestIncrementalPullAlpine(t *testing.T) {
 	tmpf, err := os.CreateTemp("", "diff-*.tar")
 	assert.NoError(t, err, "unable to create temp file")
 	defer os.Remove(tmpf.Name())
-	diff, err := inc.Pull(ctx, "scratch", "alpine:latest")
-	assert.NoError(t, err, "unable to pull the whole image")
+	diff, err := inc.Pull(ctx, "scratch", "docker.io/alpine:latest")
+	require.NoError(t, err, "unable to pull the whole image")
 	defer diff.Close()
 	_, err = io.Copy(tmpf, diff)
 	assert.NoError(t, err, "unable to copy image to temp file")
