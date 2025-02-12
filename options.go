@@ -62,6 +62,28 @@ func WithTempDir(dir string) Option {
 	}
 }
 
+// WithInsecurePull sets the pull operation to skip TLS verification.
+func WithInsecurePull() Option {
+	return func(inc *Incremental) {
+		inc.insecurePull = types.OptionalBoolTrue
+	}
+}
+
+// WithInsecurePush sets the push operation to skip TLS verification.
+func WithInsecurePush() Option {
+	return func(inc *Incremental) {
+		inc.insecurePush = types.OptionalBoolTrue
+	}
+}
+
+// WithInsecure sets both the pull and push operations to skip TLS verification.
+func WithInsecure() Option {
+	return func(inc *Incremental) {
+		inc.insecurePull = types.OptionalBoolTrue
+		inc.insecurePush = types.OptionalBoolTrue
+	}
+}
+
 // WithAllArchitectures sets the selection to include all the architectures.
 func WithAllArchitectures() Option {
 	return func(inc *Incremental) {
