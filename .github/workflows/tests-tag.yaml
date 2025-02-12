@@ -1,8 +1,8 @@
-name: tests
+name: stable tests
 on:
-  pull_request:
-    branches:
-    - main
+  push:
+    tags:
+      - '*'
 jobs:
   build:
     name: run tests

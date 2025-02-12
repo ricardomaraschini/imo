@@ -1,8 +1,6 @@
 module github.com/ricardomaraschini/imo
 
-go 1.22.8
-
-toolchain go1.23.4
+go 1.23.4
 
 require (
 	github.com/containers/image/v5 v5.34.0
