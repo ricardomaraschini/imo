@@ -1,7 +1,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/ricardomaraschini/imo.svg)](https://pkg.go.dev/github.com/ricardomaraschini/imo)
 [![Unit Tests](https://github.com/ricardomaraschini/imo/actions/workflows/tests-on-merge.yaml/badge.svg)](https://github.com/ricardomaraschini/imo/actions/workflows/tests-on-merge.yaml)
 
-# Image Overlay Kit
+# IMage Overlay kit
 
 The `imo` module manages incremental updates for container images in
 registries. It enables users to pull differences between image versions and
