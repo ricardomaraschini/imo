@@ -1,8 +1,8 @@
-name: stable tests
+name: tests
 on:
   push:
-    tags:
-      - '*'
+    branches:
+    - main
 jobs:
   build:
     name: run tests
