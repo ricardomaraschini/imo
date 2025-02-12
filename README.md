@@ -2,43 +2,47 @@
 
 # Image Overlay Kit
 
-The `imo` library provides a way to handle incremental image
-updates in container registries. It allows users to pull the
-difference between two image versions and push this differential
-update to a registry.
-
-This can significantly reduce the amount of data transferred,
-especially useful in air-gapped (disconnected) environments.
+The `imo` module manages incremental updates for container images in
+registries. It enables users to pull differences between image versions and
+push these "incremental updates" to a registry, which can significantly reduce
+data transfer size, particularly beneficial in air-gapped environments.
 
 ## Key Types and Functions
 
 ### Incremental
 
-The `Incremental` type offers methods to retrieve (via `Pull`) or transmit
-(via `Push`) the differences between two images. These differences are determined
-based on the base and final images. It is crucial to ensure that the destination
-registry, when pushing these differences, possesses all the layers not encompassed
-in the incremental difference." You can use _PushVet()_ for checking.
+The `Incremental` type provides methods to retrieve (using `Pull`) or transmit
+(using `Push`) the differences between two images. These differences are
+determined based on the `base` and `final` images.
+
+When comparing an image tag `v1` with an image tag `v2`, the `base` image is
+`v1`, and the `final` image is `v2`. The `Incremental` object calculates the
+difference between these two images.
 
 #### Methods
 
-- **PushVet**: Verifies if all layers not included in the incremental difference
-exist in the destination registry. It returns an error if any layer is missing.
-- **Push**: Pushes the incremental difference stored in an OCI-archive tarball to
-the destination registry. It fails if the remote registry lacks any layers not
-included in the incremental difference.
-- **Pull**: Pulls the incremental difference between two images. It returns an
-`io.ReadCloser` from which an OCI-archive tarball can be read. The caller is
-responsible for closing the reader.
-- **New**: Returns a new Incremental object. With this object, callers can calculate
-or send the incremental difference between two images.
+- **New**
+  - Creates a new Incremental object, enabling callers to calculate or send the
+    incremental difference between two images.
+- **Pull**
+  - Pulls the incremental difference between two images as an `io.ReadCloser`,
+    from which a tarball can be read. The caller is responsible for closing the
+    reader.
+- **PushVet**
+  - Verifies whether all necessary layers exist in the destination registry.
+    Returns an error if any layer is missing. Particularly useful before
+    pushing an incremental update.
+- **Push**
+  - Pushes the incremental difference stored in a tarball to the destination
+    registry. Fails if the remote registry lacks any required layers not
+    included in the incremental update.
 
 ## Usage
 
 ### Pulling Image Differences
 
-The `imo` library allows you to pull the difference between two container images as
-a tarball. Here's how you can do it:
+The `imo` library allows you to pull differences between container images as a
+tarball:
 
 ```go
 package main
@@ -83,9 +87,25 @@ func pull() {
 }
 ```
 
+The method `Pull` requires two image tags: the `base` image and the `final` image.
+If you want to pull an image as a whole, without calculating the difference, you
+can use `scratch` as `base`:
+
+```go
+// this will pull docker.io/myaccount/myapp:v1.0.0.
+diff, err := inc.Pull(
+	context.Background(),
+	"scratch",
+	"docker.io/myaccount/myapp:v1.0.0",
+)
+```
+
 ### Pushing Image Differences
 
-You can also use `imo` to push a differential update to a container registry:
+You can also use `imo` to push a differential update to a container registry.
+Before pushing it is important to validate that the remote registry has all the
+layers not included in the incremental difference. You can use `PushVet` for
+this:
 
 ```go
 package main
