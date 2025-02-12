@@ -34,10 +34,12 @@ type Authentications struct {
 // When Pushing the difference to a destination registry it is important to note that
 // the other layers (the ones not included in the 'difference') exist.
 type Incremental struct {
-	tmpdir    string
-	report    io.Writer
-	auths     Authentications
-	selection copy.ImageListSelection
+	tmpdir       string
+	report       io.Writer
+	auths        Authentications
+	selection    copy.ImageListSelection
+	insecurePull types.OptionalBool
+	insecurePush types.OptionalBool
 }
 
 // PushVet verifies if all the layers not included in the incremental difference exist
@@ -48,7 +50,10 @@ func (inc *Incremental) PushVet(ctx context.Context, src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("error parsing destination reference: %w", err)
 	}
-	sysctx := &types.SystemContext{DockerAuthConfig: inc.auths.PushAuth}
+	sysctx := &types.SystemContext{
+		DockerAuthConfig:            inc.auths.PushAuth,
+		DockerInsecureSkipTLSVerify: inc.insecurePush,
+	}
 	dstman := NewManifestsIndex(sysctx)
 	if err := dstman.FetchManifests(ctx, dstref); err != nil {
 		return fmt.Errorf("error fetching destination manifests: %w", err)
@@ -111,7 +116,8 @@ func (inc *Incremental) Push(ctx context.Context, src, dst string) error {
 			SourceCtx:          &types.SystemContext{},
 			ImageListSelection: inc.selection,
 			DestinationCtx: &types.SystemContext{
-				DockerAuthConfig: inc.auths.PushAuth,
+				DockerAuthConfig:            inc.auths.PushAuth,
+				DockerInsecureSkipTLSVerify: inc.insecurePush,
 			},
 		},
 	); err != nil {
@@ -167,7 +173,8 @@ func (inc *Incremental) Pull(ctx context.Context, base, final string) (io.ReadCl
 			DestinationCtx:     &types.SystemContext{},
 			ImageListSelection: inc.selection,
 			SourceCtx: &types.SystemContext{
-				DockerAuthConfig: inc.auths.FinalAuth,
+				DockerAuthConfig:            inc.auths.FinalAuth,
+				DockerInsecureSkipTLSVerify: inc.insecurePull,
 			},
 		},
 	); err != nil {
@@ -186,9 +193,11 @@ func (inc *Incremental) Pull(ctx context.Context, base, final string) (io.ReadCl
 // a destination (Push).
 func New(opts ...Option) *Incremental {
 	inc := &Incremental{
-		tmpdir:    os.TempDir(),
-		report:    io.Discard,
-		selection: copy.CopySystemImage,
+		tmpdir:       os.TempDir(),
+		report:       io.Discard,
+		selection:    copy.CopySystemImage,
+		insecurePull: types.OptionalBoolFalse,
+		insecurePush: types.OptionalBoolFalse,
 	}
 	for _, opt := range opts {
 		opt(inc)
