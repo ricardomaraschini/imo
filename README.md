@@ -1,5 +1,8 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/ricardomaraschini/imo.svg)](https://pkg.go.dev/github.com/ricardomaraschini/imo)
 [![Unit Tests](https://github.com/ricardomaraschini/imo/actions/workflows/tests-on-merge.yaml/badge.svg)](https://github.com/ricardomaraschini/imo/actions/workflows/tests-on-merge.yaml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ricardomaraschini/imo)](https://goreportcard.com/report/github.com/ricardomaraschini/imo)
+[![Scc Count Badge](https://sloc.xyz/github/ricardomaraschini/imo/)](https://github.com/ricardomaraschini/imo/)
+[![License Badge](https://badgen.net/badge/license/Apache/blue?icon=git)](https://badgen.net/badge/license/Apache/blue?icon=git)
 
 # IMage Overlay kit
 
