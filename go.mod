@@ -6,7 +6,7 @@ require (
 	github.com/containers/image/v5 v5.36.1
 	github.com/google/uuid v1.6.0
 	github.com/opencontainers/go-digest v1.0.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 )
 
 require (
