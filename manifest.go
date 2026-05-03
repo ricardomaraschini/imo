@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/containers/image/v5/manifest"
-	"github.com/containers/image/v5/types"
 	"github.com/opencontainers/go-digest"
+	"go.podman.io/image/v5/manifest"
+	"go.podman.io/image/v5/types"
 )
 
 // ManifestsIndex is an entity that indexes multiple manifests that are part

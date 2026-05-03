@@ -3,8 +3,8 @@ package imo
 import (
 	"io"
 
-	"github.com/containers/image/v5/copy"
-	"github.com/containers/image/v5/types"
+	"go.podman.io/image/v5/copy"
+	"go.podman.io/image/v5/types"
 )
 
 // Option is a functional option for the Incremental type.
