@@ -7,10 +7,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/containers/image/v5/copy"
-	"github.com/containers/image/v5/transports/alltransports"
-	"github.com/containers/image/v5/types"
 	"github.com/google/uuid"
+	"go.podman.io/image/v5/copy"
+	"go.podman.io/image/v5/transports/alltransports"
+	"go.podman.io/image/v5/types"
 )
 
 // Authentications holds the all the necessary authentications for the incremental
