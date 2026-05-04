@@ -17,13 +17,13 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install libbtrfs-dev libdevmapper-dev -y
+    - name: clear registry.conf
+      run: sudo mv /etc/containers/registries.conf /etc/containers/registries.conf-bkp
     - name: set up go
       uses: actions/setup-go@v5
       with:
         go-version: 1.23
     - name: check out code
       uses: actions/checkout@v4
-    - name: clear registry.conf
-      run: sudo mv /etc/containers/registries.conf /etc/containers/registries.conf-bkp
     - name: run tests
       run: go test -tags containers_image_openpgp -v ./...
