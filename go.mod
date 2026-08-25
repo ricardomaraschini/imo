@@ -6,7 +6,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/stretchr/testify v1.12.1
-	go.podman.io/image/v5 v5.41.0
+	go.podman.io/image/v5 v5.41.1
 )
 
 require (
